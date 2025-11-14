@@ -2,7 +2,9 @@ part of '../kinora_flow.dart';
 
 /// FlowFeature is a base class for creating features in the Flow architecture.
 final class FlowManager implements IFlowComponentListener {
-  FlowManager();
+  FlowManager({FlowManager? parentManager}) : _parentManager = parentManager;
+
+  final FlowManager? _parentManager; // Reference to the parent manager
 
   /// Set of features in the Flow manager.
   @visibleForTesting
@@ -91,7 +93,9 @@ final class FlowManager implements IFlowComponentListener {
       try {
         return feature.getComponent<TComponent>();
       } catch (_) {
-        continue;
+        if (_parentManager != null) {
+          return _parentManager.getComponent<TComponent>();
+        }
       }
     }
 

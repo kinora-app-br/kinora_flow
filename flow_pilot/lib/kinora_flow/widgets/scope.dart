@@ -29,13 +29,21 @@ final class FlowScope extends StatefulWidget {
 
 final class _FlowScopeState extends State<FlowScope>
     with SingleTickerProviderStateMixin {
-  final manager = FlowManager();
+  late final FlowManager manager;
 
   Ticker? ticker;
   Duration duration = .zero;
 
   @override
   void initState() {
+    super.initState();
+
+    final parentManager = context
+        .findAncestorStateOfType<_FlowScopeState>()
+        ?.manager;
+
+    manager = FlowManager(parentManager: parentManager);
+
     for (final feature in widget.features) {
       manager.addFeature(feature);
     }
@@ -48,8 +56,6 @@ final class _FlowScopeState extends State<FlowScope>
       manager.initialize();
       unawaited(ticker?.start());
     });
-
-    super.initState();
   }
 
   void buildTicker() {

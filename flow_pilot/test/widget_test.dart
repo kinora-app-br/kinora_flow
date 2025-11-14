@@ -8,6 +8,10 @@ class CounterState extends FlowState<int> {
   CounterState([super.value = 0]);
 }
 
+class AltCounterState extends FlowState<int> {
+  AltCounterState([super.value = 0]);
+}
+
 class MessageState extends FlowState<String> {
   MessageState([super.value = "initial"]);
 }
@@ -104,6 +108,67 @@ class MultipleComponentsTestWidget extends FlowView {
 
 void main() {
   group("FlowView", () {
+    testWidgets(
+      "should inherit features from outer FlowScope and dispose only inner scope features",
+      (tester) async {
+        final outerCounterComponent = CounterState();
+        final outerFeature = TestFeature()..addComponent(outerCounterComponent);
+        final innerCounterComponent = AltCounterState();
+        final innerFeature = TestFeature()..addComponent(innerCounterComponent);
+        var innerScopeDisposed = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FlowScope(
+              features: {outerFeature},
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return Column(
+                    children: [
+                      const WatchingTestWidget(key: Key("outer")),
+                      if (innerScopeDisposed == false)
+                        FlowScope(
+                          features: {innerFeature},
+                          child: const WatchingTestWidget(key: Key("inner")),
+                        ),
+                      ElevatedButton(
+                        onPressed: () => setState(() => innerScopeDisposed = true),
+                        child: const Text("Dispose Inner Scope"),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Verify initial state
+        expect(find.text("Counter: 0"), findsNWidgets(2));
+
+        // Dispose of inner scope
+        await tester.tap(find.text("Dispose Inner Scope"));
+        await tester.pump();
+
+        // Change outer counter value
+        outerCounterComponent.update(5);
+        await tester.pump();
+
+        // Verify outer counter is still watched by outer scope widgets
+        expect(find.text("Counter: 5"), findsOneWidget);
+
+        // Verify inner scope widget is removed and doesn't show updates
+        expect(find.byKey(const Key("inner")), findsNothing);
+
+        // Verify inner counter no longer updates (because it's disposed)
+        innerCounterComponent.update(10);
+        await tester.pump();
+
+        // Outer scope should not have rendered any inner scope feature updates
+        expect(find.text("Counter: 10"), findsNothing);
+      },
+    );
+
     testWidgets("should watch component changes and rebuild", (tester) async {
       final component = CounterState();
       final feature = TestFeature()..addComponent(component);
