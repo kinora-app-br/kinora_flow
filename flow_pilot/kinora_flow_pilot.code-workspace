@@ -1,0 +1,48 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build Runner Watch",
+        "command": "build_watch.sh",
+        "type": "process",
+        "presentation": {
+          "reveal": "always"
+        },
+        "isBackground": true,
+        "isBuildCommand": true,
+        "group": "build"
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "frontend",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main.dart"
+      },
+      {
+        "name": "frontend (profile mode)",
+        "request": "launch",
+        "type": "dart",
+        "flutterMode": "profile",
+        "program": "lib/main.dart"
+      },
+      {
+        "name": "frontend (release mode)",
+        "request": "launch",
+        "type": "dart",
+        "flutterMode": "release",
+        "program": "lib/main.dart"
+      }
+    ]
+  }
+}
