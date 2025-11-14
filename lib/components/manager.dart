@@ -72,14 +72,7 @@ final class FlowManager implements IFlowComponentListener {
   @protected
   @visibleForTesting
   void onComponentChanged(FlowComponent component) {
-    FlowLogger.log(
-      _ComponentChanged(
-        time: .now(),
-        level: .info,
-        component: component,
-        stack: .current,
-      ),
-    );
+    FlowLogger.log(_ComponentChanged(level: .verbose, component: component));
 
     for (final feature in features) {
       feature.react(component);

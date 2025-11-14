@@ -16,6 +16,11 @@ final class FlowLogger {
   /// Unmodifiable list of log entries.
   static List<FlowLog> get entries => List.unmodifiable(_entries);
 
+  static final _logStreamController = StreamController<FlowLog>.broadcast();
+
+  /// Stream for each [FlowLog] entry logged.
+  static final Stream<FlowLog> onLog = _logStreamController.stream;
+
   /// Logs a custom log entry.
   static void log(FlowLog log) {
     while (_entries.length >= maxEntries) {
@@ -23,22 +28,15 @@ final class FlowLogger {
     }
 
     _entries.add(log);
+    _logStreamController.add(log);
   }
 
   /// Easy way to log debug messages.
   ///
   /// This method only logs messages in debug mode.
-  static void debugPrint(String message) {
+  static void debugPrint(String message, {String logName = "Debug"}) {
     if (kDebugMode == false) return;
-
-    log(
-      DebugMessage(
-        time: .now(),
-        level: .debug,
-        message: message,
-        stack: .current,
-      ),
-    );
+    log(LogMessage(message, level: .debug, stack: .current, logName: logName));
   }
 
   /// Clears all log entries.
@@ -49,20 +47,23 @@ final class FlowLogger {
 
 /// Base class for Flow log entries.
 abstract class FlowLog {
-  const FlowLog({
-    required this.time,
+  FlowLog({
+    required this.logName,
     required this.level,
-    required this.stack,
-  });
+    this.stack,
+  }) : time = .now();
 
-  /// The time when the log entry was created.
+  /// The name of the log entry.
+  final String logName;
+
+  /// The time the log entry was created.
   final DateTime time;
 
   /// The log level of the entry.
   final FlowLogLevel level;
 
   /// The stack trace at the time of logging.
-  final StackTrace stack;
+  final StackTrace? stack;
 
   /// Human-readable description of the log entry.
   String get description;
@@ -70,6 +71,12 @@ abstract class FlowLog {
 
 /// Represents the log levels for Flow logging.
 enum FlowLogLevel {
+  /// Debug log level.
+  debug,
+
+  /// Verbose log level.
+  verbose,
+
   /// Informational log level.
   info,
 
@@ -79,24 +86,14 @@ enum FlowLogLevel {
   /// Error log level.
   error,
 
-  /// Debug log level.
-  debug,
-
-  /// Verbose log level.
-  verbose,
-
   /// Fatal log level.
   fatal,
 }
 
 /// Represents an component change event in the Flow logic.
 final class _ComponentChanged<TComponent extends FlowComponent> extends FlowLog {
-  const _ComponentChanged({
-    required super.time,
-    required super.level,
-    required this.component,
-    required super.stack,
-  });
+  _ComponentChanged({required super.level, required this.component})
+    : super(logName: "ComponentChanged<$TComponent>");
 
   /// The component that changed.
   final TComponent component;
@@ -126,13 +123,11 @@ final class _LogicReacted<
   TEvent extends FlowComponent
 >
     extends FlowLog {
-  const _LogicReacted({
-    required super.time,
+  _LogicReacted({
     required super.level,
     required this.logic,
     required this.component,
-    required super.stack,
-  });
+  }) : super(logName: "LogicReacted<$TLogic, $TEvent>");
 
   /// The logic that reacted to the component change.
   final TLogic logic;
@@ -161,17 +156,14 @@ final class _LogicReacted<
   }
 }
 
-final class DebugMessage extends FlowLog {
-  const DebugMessage({
-    required super.time,
+final class LogMessage extends FlowLog {
+  LogMessage(
+    this.description, {
+    required super.logName,
     required super.level,
-    required this.message,
-    required super.stack,
+    super.stack,
   });
 
-  /// The debug message.
-  final String message;
-
   @override
-  String get description => message;
+  final String description;
 }

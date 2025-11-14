@@ -155,13 +155,7 @@ abstract class FlowFeature {
     for (final logic in logic) {
       if (logic.reactsIf) {
         FlowLogger.log(
-          _LogicReacted(
-            time: .now(),
-            level: .info,
-            logic: logic,
-            component: component,
-            stack: .current,
-          ),
+          _LogicReacted(level: .verbose, logic: logic, component: component),
         );
 
         logic.react();
