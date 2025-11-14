@@ -119,7 +119,7 @@ void main() {
       expect(feature.executed, isTrue);
     });
 
-    test("onComponentChanged triggers reactive logics", () {
+    test("onComponentChanged triggers reactive logic", () {
       final manager = FlowManager();
       final feature = DummyFeature();
       final reactive = DummyReactiveLogic();
@@ -168,7 +168,7 @@ void main() {
       expect(() => manager.execute(Duration.zero), returnsNormally);
     });
 
-    test("onComponentChanged with no reactive logics does not throw", () {
+    test("onComponentChanged with no reactive logic does not throw", () {
       final manager = FlowManager();
       final feature = DummyFeature();
 
@@ -190,7 +190,7 @@ void main() {
       expect(component.listeners, contains(manager));
     });
 
-    test("multiple reactive logics for same component type are triggered", () {
+    test("multiple reactive logic for same component type are triggered", () {
       final manager = FlowManager();
       final feature = DummyFeature();
       final reactive1 = DummyReactiveLogic();
@@ -203,7 +203,7 @@ void main() {
       expect(reactive2.reacted, isTrue);
     });
 
-    test("reactive logics only trigger for correct component types", () {
+    test("reactive logic only trigger for correct component types", () {
       final manager = FlowManager();
       final feature = DummyFeature();
       final eventReactiveLogic = DummyReactiveLogic();
@@ -277,7 +277,7 @@ void main() {
       expect(feature2.executed, isTrue);
     });
 
-    test("component change triggers logics across all features", () {
+    test("component change triggers logic across all features", () {
       final manager = FlowManager();
       final feature1 = DummyFeature();
       final feature2 = AnotherDummyFeature();

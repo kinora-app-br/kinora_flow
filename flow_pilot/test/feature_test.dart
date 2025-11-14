@@ -8,7 +8,7 @@ class DummyState extends FlowState<int> {
 
 class DummyEvent extends FlowEvent {}
 
-class DummyInitLogic extends FlowInitializeLogic {
+class DummyInitLogic extends FlowFeatureInitializationLogic {
   bool initialized = false;
 
   @override
@@ -18,7 +18,7 @@ class DummyInitLogic extends FlowInitializeLogic {
   void initialize() => initialized = true;
 }
 
-class DummyTeardownLogic extends FlowTeardownLogic {
+class DummyTeardownLogic extends FlutterFeatureDisposalLogic {
   bool tornDown = false;
 
   @override
@@ -28,7 +28,7 @@ class DummyTeardownLogic extends FlowTeardownLogic {
   void teardown() => tornDown = true;
 }
 
-class DummyCleanupLogic extends FlowCleanupLogic {
+class DummyCleanupLogic extends FlowCleanUpLogic {
   bool cleaned = false;
 
   @override
@@ -38,7 +38,7 @@ class DummyCleanupLogic extends FlowCleanupLogic {
   void cleanup() => cleaned = true;
 }
 
-class DummyExecuteLogic extends FlowExecuteLogic {
+class DummyExecuteLogic extends FlowFrameExecutionLogic {
   Duration? lastElapsed;
 
   @override
@@ -171,7 +171,7 @@ void main() {
         ..addLogic(DummyExecuteLogic())
         ..addLogic(DummyReactiveLogic());
 
-      expect(feature.logicsCount, 5);
+      expect(feature.logicCount, 5);
     });
 
     test("getComponent throws StateError for non-existent component type", () {
@@ -239,7 +239,7 @@ void main() {
     test("logicsCount is zero for empty feature", () {
       final feature = TestFeature();
 
-      expect(feature.logicsCount, 0);
+      expect(feature.logicCount, 0);
     });
 
     test("components set contains all added components", () {

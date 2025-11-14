@@ -1,6 +1,6 @@
 part of '../kinora_flow.dart';
 
-/// Base class for Flow logics.
+/// Base class for Flow logic.
 sealed class FlowLogic {
   FlowLogic();
 
@@ -32,68 +32,68 @@ sealed class FlowLogic {
   FlowManager get manager => _feature.manager;
 }
 
-/// Base class for initialize logics.
+/// Base class for feature initializion logic.
 ///
-/// Initialize logics are used to perform setup tasks.
+/// Initialize logic are used to perform setup tasks.
 ///
 /// The [initialize] method should be overridden in subclasses to perform
 /// the actual initialization logic.
 ///
 /// The [initialize] method is called once after the first frame is rendered and
-/// before any other logics are executed.
-abstract class FlowInitializeLogic extends FlowLogic {
-  FlowInitializeLogic();
+/// before any other logic are executed.
+abstract class FlowFeatureInitializationLogic extends FlowLogic {
+  FlowFeatureInitializationLogic();
 
   /// Initialize logic for the logic.
   @visibleForTesting
   void initialize();
 }
 
-/// Base class for cleanup logics.
+/// Base class for cleanup logic.
 ///
-/// Cleanup logics are used to perform cleanup tasks.
+/// Cleanup logic are used to perform cleanup tasks.
 ///
 /// The [cleanup] method should be overridden in subclasses to perform the
 /// actual cleanup logic.
 ///
-/// The [cleanup] method is called after all [FlowExecuteLogic]s have been executed
+/// The [cleanup] method is called after all [FlowFrameExecutionLogic]s have been executed
 /// and before the next frame is rendered.
-abstract class FlowCleanupLogic extends FlowLogic {
-  FlowCleanupLogic();
+abstract class FlowCleanUpLogic extends FlowLogic {
+  FlowCleanUpLogic();
 
   /// Cleanup logic for the logic.
   @protected
   void cleanup();
 }
 
-/// Base class for teardown logics.
+/// Base class for feature disposal logic.
 ///
-/// Teardown logics are used to perform teardown tasks.
+/// Teardown logic are used to perform teardown tasks.
 ///
 /// The [teardown] method should be overridden in subclasses to perform the
 /// actual teardown logic.
 ///
 /// The [teardown] method is called once after the last frame is rendered and
 /// before the application is disposed.
-abstract class FlowTeardownLogic extends FlowLogic {
-  FlowTeardownLogic();
+abstract class FlutterFeatureDisposalLogic extends FlowLogic {
+  FlutterFeatureDisposalLogic();
 
   /// Teardown logic for the logic.
   @protected
   void teardown();
 }
 
-/// Base class for execute logics.
+/// Base class for execute logic.
 ///
-/// Execute logics are used to perform tasks that need to be executed
+/// Execute logic are used to perform tasks that need to be executed
 /// periodically, such as updating the state of components or processing events.
 ///
 /// The [execute] method should be overridden in subclasses to perform the
 /// actual execution logic.
 ///
 /// The [execute] method is called every frame.
-abstract class FlowExecuteLogic extends FlowLogic {
-  FlowExecuteLogic();
+abstract class FlowFrameExecutionLogic extends FlowLogic {
+  FlowFrameExecutionLogic();
 
   /// Whether the logic should be executed or not.
   ///
@@ -108,9 +108,9 @@ abstract class FlowExecuteLogic extends FlowLogic {
   void execute(Duration elapsed);
 }
 
-/// Base class for reactive logics.
+/// Base class for reactive logic.
 ///
-/// Reactive logics are used to react to changes in components.
+/// Reactive logic are used to react to changes in components.
 ///
 /// The [react] method should be overridden in subclasses to perform the
 /// actual reaction logic.

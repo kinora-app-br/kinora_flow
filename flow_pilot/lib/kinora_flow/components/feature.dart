@@ -2,7 +2,7 @@ part of '../kinora_flow.dart';
 
 /// FlowFeature is a base class for creating features in the Flow architecture.
 ///
-/// Features can contain components and logics, and they provide a way to organize
+/// Features can contain components and logic, and they provide a way to organize
 /// and manage different parts of the Flow architecture.
 abstract class FlowFeature {
   FlowFeature();
@@ -11,23 +11,23 @@ abstract class FlowFeature {
   @visibleForTesting
   final Set<FlowComponent> components = {};
 
-  /// Set of initialize logics in this feature.
+  /// Set of initialize logic in this feature.
   @visibleForTesting
-  final Set<FlowInitializeLogic> initializeLogics = {};
+  final Set<FlowFeatureInitializationLogic> initializeLogics = {};
 
-  /// Set of teardown logics in this feature.
+  /// Set of teardown logic in this feature.
   @visibleForTesting
-  final Set<FlowTeardownLogic> teardownLogics = {};
+  final Set<FlutterFeatureDisposalLogic> teardownLogics = {};
 
-  /// Set of cleanup logics in this feature.
+  /// Set of cleanup logic in this feature.
   @visibleForTesting
-  final Set<FlowCleanupLogic> cleanupLogics = {};
+  final Set<FlowCleanUpLogic> cleanupLogics = {};
 
-  /// Set of execute logics in this feature.
+  /// Set of execute logic in this feature.
   @visibleForTesting
-  final Set<FlowExecuteLogic> executeLogics = {};
+  final Set<FlowFrameExecutionLogic> executeLogics = {};
 
-  /// Map of reactive logics by component type.
+  /// Map of reactive logic by component type.
   @visibleForTesting
   final Map<Type, Set<FlowReactiveLogic>> reactiveLogics = {};
 
@@ -36,9 +36,9 @@ abstract class FlowFeature {
   @visibleForTesting
   late FlowManager manager;
 
-  /// Number of logics in this feature.
+  /// Number of logic in this feature.
   @visibleForTesting
-  int get logicsCount {
+  int get logicCount {
     return initializeLogics.length +
         teardownLogics.length +
         reactiveLogics.length +
@@ -76,19 +76,19 @@ abstract class FlowFeature {
 
   /// Adds a logic to this feature.
   ///
-  /// This method is protected and should be used by subclasses to add logics.
+  /// This method is protected and should be used by subclasses to add logic.
   /// If the logic is already added, it will not be added again.
   @protected
   @visibleForTesting
   void addLogic(FlowLogic logic) {
     switch (logic) {
-      case FlowInitializeLogic():
+      case FlowFeatureInitializationLogic():
         initializeLogics.add(logic);
-      case FlowTeardownLogic():
+      case FlutterFeatureDisposalLogic():
         teardownLogics.add(logic);
-      case FlowCleanupLogic():
+      case FlowCleanUpLogic():
         cleanupLogics.add(logic);
-      case FlowExecuteLogic():
+      case FlowFrameExecutionLogic():
         executeLogics.add(logic);
       case FlowReactiveLogic():
         for (final component in logic.reactsTo) {
@@ -99,14 +99,14 @@ abstract class FlowFeature {
     logic._setFeature(this);
   }
 
-  /// Adds logics to this feature.
+  /// Adds logic to this feature.
   ///
-  /// This method is protected and should be used by subclasses to add logics.
+  /// This method is protected and should be used by subclasses to add logic.
   /// If the logic is already added, it will not be added again.
   @protected
   @visibleForTesting
-  void addLogics(Set<FlowLogic> logics) {
-    for (final logic in logics) {
+  void addLogics(Set<FlowLogic> logic) {
+    for (final logic in logic) {
       addLogic(logic);
     }
   }
@@ -148,11 +148,11 @@ abstract class FlowFeature {
   /// Reacts to an component change.
   @visibleForTesting
   void react(FlowComponent component) {
-    final logics = reactiveLogics[component.runtimeType];
+    final logic = reactiveLogics[component.runtimeType];
 
-    if (logics == null || logics.isEmpty) return;
+    if (logic == null || logic.isEmpty) return;
 
-    for (final logic in logics) {
+    for (final logic in logic) {
       if (logic.reactsIf) {
         FlowLogger.log(
           _LogicReacted(

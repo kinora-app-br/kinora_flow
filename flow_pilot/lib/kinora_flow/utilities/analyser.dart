@@ -546,12 +546,12 @@ final class FlowAnalyser {
   static FlowAnalysis? _graph;
 
   static final FlowNode _executeNode = FlowNode(
-    type: FlowExecuteLogic,
+    type: FlowFrameExecutionLogic,
     description: "Execute",
   );
 
   static final FlowNode _initializeNode = FlowNode(
-    type: FlowInitializeLogic,
+    type: FlowFeatureInitializationLogic,
     description: "Initialize",
   );
 
@@ -688,7 +688,7 @@ final class FlowAnalyser {
     }
   }
 
-  static void _createNodeForInitializeLogic(FlowInitializeLogic logic) {
+  static void _createNodeForInitializeLogic(FlowFeatureInitializationLogic logic) {
     if (logic.interactsWith.isEmpty) return;
 
     for (final type in logic.interactsWith) {
@@ -711,7 +711,7 @@ final class FlowAnalyser {
     }
   }
 
-  static void _createNodeForExecuteLogic(FlowExecuteLogic logic) {
+  static void _createNodeForExecuteLogic(FlowFrameExecutionLogic logic) {
     if (logic.interactsWith.isEmpty) return;
 
     for (final type in logic.interactsWith) {
