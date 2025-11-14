@@ -1,6 +1,6 @@
 name: kinora_flow
 description: "Kinora Flow Event Driven State Management"
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/kinora-app-br/kinora_flow
 issue_tracker: https://github.com/kinora-app-br/kinora_flow/issues
 documentation: https://github.com/kinora-app-br/kinora_flow/blob/main/README.md
