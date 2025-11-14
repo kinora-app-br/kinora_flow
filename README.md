@@ -1,5 +1,7 @@
 # Kinora Flow - Event Driven State Management
 
+![Flutter Tests](https://github.com/kinora-app-br/kinora_flow/actions/workflows/test.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/kinora-app-br/kinora_flow/branch/main/graph/badge.svg)](https://codecov.io/gh/kinora-app-br/kinora_flow)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)](https://dart.dev)
