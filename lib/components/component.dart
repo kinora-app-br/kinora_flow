@@ -4,7 +4,7 @@ part of '../kinora_flow.dart';
 abstract interface class IFlowComponentListener {
   /// Called when a component changes.
   @protected
-  void onComponentChanged(FlowComponent component) {}
+  void onComponentChanged(FlowComponent component);
 }
 
 /// Represents a base component in the Flow architecture.
