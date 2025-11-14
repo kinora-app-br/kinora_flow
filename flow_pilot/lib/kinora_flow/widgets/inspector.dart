@@ -72,7 +72,7 @@ final class _SummaryViewState extends State<_SummaryView> {
   @override
   Widget build(BuildContext context) {
     final manager = FlowScope.of(context);
-    final analysis = FlowAnalyser.analize(manager);
+    final analysis = FlowAnalyser.analise(manager);
     final cascade = analysis.getCascadeAnalysis();
 
     return ListView(

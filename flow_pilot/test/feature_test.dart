@@ -174,10 +174,10 @@ void main() {
       expect(feature.logicsCount, 5);
     });
 
-    test("getComponent returns null for non-existent component type", () {
+    test("getComponent throws StateError for non-existent component type", () {
       final feature = TestFeature();
 
-      expect(feature.getComponent<DummyState>(), isNull);
+      expect(() => feature.getComponent<DummyState>(), throwsA(isA<StateError>()));
     });
 
     test("multiple components of same type returns first", () {

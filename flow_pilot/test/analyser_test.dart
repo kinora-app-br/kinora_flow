@@ -57,14 +57,14 @@ void main() {
     });
 
     test("should build cascade graph", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
 
       expect(graph.nodes.isNotEmpty, true);
       expect(graph.edges.isNotEmpty, true);
     });
 
     test("should detect cascade flows from TestEvent", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final flows = graph.getCascadeFlowsFrom(TestEvent);
 
       expect(flows.isNotEmpty, true);
@@ -75,7 +75,7 @@ void main() {
     });
 
     test("should get cascade summary", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final summary = graph.getCascadeSummary();
 
       expect(summary.totalComponents, greaterThan(0));
@@ -83,7 +83,7 @@ void main() {
     });
 
     test("should identify cascade triggers", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final triggers = graph.getCascadeTriggers();
 
       expect(triggers.contains(TestEvent), true);
@@ -91,7 +91,7 @@ void main() {
     });
 
     test("should identify cascade targets", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final targets = graph.getCascadeTargets();
 
       expect(targets.contains(TestState), true);
@@ -99,30 +99,30 @@ void main() {
     });
 
     test("should detect no circular dependencies in simple case", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final circular = graph.getCircularDependencies();
 
       expect(circular.isEmpty, true);
     });
 
     test("should validate logic without issues", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final issues = graph.validateCascadeSystem();
 
       expect(issues.isEmpty, true);
     });
 
     test("should generate DOT graph", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final dotGraph = graph.generateDotGraph();
 
-      expect(dotGraph.contains("digraph ECS_Cascade_Flow"), true);
+      expect(dotGraph.contains("digraph Flow_Cascade_Flow"), true);
       expect(dotGraph.contains("TestEvent"), true);
-      expect(dotGraph.contains("TestComponent"), true);
+      expect(dotGraph.contains("TestState"), true);
     });
 
     test("should simulate cascade flow", () {
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final simulation = graph.simulateCascadeFlow(TestEvent);
 
       expect(simulation.isNotEmpty, true);
@@ -138,7 +138,7 @@ void main() {
       final feature = _CircularTestFeature();
       manager.addFeature(feature);
 
-      final graph = FlowAnalyser.analize(manager);
+      final graph = FlowAnalyser.analise(manager);
       final circular = graph.getCircularDependencies();
 
       expect(circular.isNotEmpty, true);

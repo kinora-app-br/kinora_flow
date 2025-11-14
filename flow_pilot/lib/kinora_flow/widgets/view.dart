@@ -16,7 +16,7 @@ final class _FlowViewState extends State<FlowView> {
   FlowContext? _flow;
 
   @protected
-  FlowContext get ecs {
+  FlowContext get flow {
     return _flow ??= FlowContext(
       FlowScope.of(context),
       () {
@@ -29,7 +29,7 @@ final class _FlowViewState extends State<FlowView> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ecs.initialize();
+      flow.initialize();
     });
 
     super.initState();
@@ -37,13 +37,13 @@ final class _FlowViewState extends State<FlowView> {
 
   @override
   void dispose() {
-    ecs.dispose();
+    flow.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.build(context, ecs);
+    return widget.build(context, flow);
   }
 }
 
@@ -51,15 +51,16 @@ abstract class FlowStatefulView extends StatefulWidget {
   const FlowStatefulView({super.key});
 
   @override
-  ECSState<FlowStatefulView> createState();
+  FlowStatefulViewState<FlowStatefulView> createState();
 }
 
-abstract class ECSState<TWidget extends FlowStatefulView> extends State<TWidget> {
-  FlowContext? _ecs;
+abstract class FlowStatefulViewState<TWidget extends FlowStatefulView>
+    extends State<TWidget> {
+  FlowContext? _flow;
 
   @protected
-  FlowContext get ecs {
-    return _ecs ??= FlowContext(
+  FlowContext get flow {
+    return _flow ??= FlowContext(
       FlowScope.of(context),
       () {
         if (mounted == false) return;
@@ -71,7 +72,7 @@ abstract class ECSState<TWidget extends FlowStatefulView> extends State<TWidget>
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ecs.initialize();
+      flow.initialize();
     });
 
     super.initState();
@@ -79,7 +80,7 @@ abstract class ECSState<TWidget extends FlowStatefulView> extends State<TWidget>
 
   @override
   void dispose() {
-    ecs.dispose();
+    flow.dispose();
     super.dispose();
   }
 }

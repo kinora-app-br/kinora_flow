@@ -33,7 +33,7 @@ class TestFeature extends FlowFeature {
   }
 }
 
-// Test widget that uses ECSReference
+// Test widget that uses FlowReference
 class TestView extends FlowView {
   const TestView({
     super.key,
@@ -44,15 +44,15 @@ class TestView extends FlowView {
   final Widget Function(BuildContext, FlowContext)? customBuilder;
 
   @override
-  Widget build(BuildContext context, FlowContext ecs) {
-    onBuild?.call(ecs);
+  Widget build(BuildContext context, FlowContext flow) {
+    onBuild?.call(flow);
 
     if (customBuilder != null) {
-      return customBuilder!(context, ecs);
+      return customBuilder!(context, flow);
     }
 
-    final counter = ecs.watch<TestCounterState>();
-    final stringComponent = ecs.get<TestStringState>();
+    final counter = flow.watch<TestCounterState>();
+    final stringComponent = flow.get<TestStringState>();
 
     return Column(
       children: [
@@ -64,7 +64,7 @@ class TestView extends FlowView {
 }
 
 void main() {
-  group("ECSReference Tests", () {
+  group("FlowReference Tests", () {
     late FlowManager manager;
     late TestFeature feature;
     late FlowContext reference;
@@ -217,7 +217,7 @@ void main() {
   });
 
   group("View Integration Tests", () {
-    testWidgets("should build with ECSReference", (WidgetTester tester) async {
+    testWidgets("should build with FlowReference", (WidgetTester tester) async {
       final feature = TestFeature();
       FlowContext? capturedReference;
 

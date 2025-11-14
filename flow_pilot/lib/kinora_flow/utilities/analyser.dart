@@ -2,21 +2,20 @@ part of '../kinora_flow.dart';
 
 @immutable
 final class FlowNode {
-  const FlowNode({
+  FlowNode({
     required this.type,
     required this.description,
-    this.outgoing = const {},
-    this.incoming = const {},
   });
 
   final Type type;
   final String description;
-  final Set<FlowEdge> outgoing;
-  final Set<FlowEdge> incoming;
+  final outgoing = <FlowEdge>{};
+  final incoming = <FlowEdge>{};
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
+
     return other is FlowNode &&
         runtimeType == other.runtimeType &&
         type == other.type;
@@ -546,12 +545,12 @@ final class FlowAnalyser {
   static final Set<FlowEdge> _edges = {};
   static FlowAnalysis? _graph;
 
-  static const FlowNode _executeNode = FlowNode(
+  static final FlowNode _executeNode = FlowNode(
     type: FlowExecuteLogic,
     description: "Execute",
   );
 
-  static const FlowNode _initializeNode = FlowNode(
+  static final FlowNode _initializeNode = FlowNode(
     type: FlowInitializeLogic,
     description: "Initialize",
   );
@@ -561,7 +560,7 @@ final class FlowAnalyser {
   }
 
   /// Builds the cascade graph for the Flow logic
-  static FlowAnalysis analize(
+  static FlowAnalysis analise(
     FlowManager manager, {
     Set<Type> excludeFeatures = const {},
   }) {
