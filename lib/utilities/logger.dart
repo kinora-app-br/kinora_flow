@@ -92,8 +92,11 @@ enum FlowLogLevel {
 
 /// Represents an component change event in the Flow logic.
 final class _ComponentChanged<TComponent extends FlowComponent> extends FlowLog {
-  _ComponentChanged({required super.level, required this.component})
-    : super(logName: "ComponentChanged<$TComponent>");
+  _ComponentChanged({
+    required super.level,
+    required this.component,
+    required super.logName,
+  });
 
   /// The component that changed.
   final TComponent component;
@@ -101,7 +104,7 @@ final class _ComponentChanged<TComponent extends FlowComponent> extends FlowLog 
   @override
   String get description {
     final buffer = StringBuffer(
-      "[${component._feature.runtimeType}.${component.runtimeType}] ",
+      "[${component._feature.runtimeType}.${component.runtimeType}]",
     );
 
     switch (component) {
@@ -111,11 +114,10 @@ final class _ComponentChanged<TComponent extends FlowComponent> extends FlowLog 
         final current = state.buildDescriptor(state.value);
 
         buffer
-          ..write("updated ")
+          ..write(" updated ")
           ..write("from $previous ")
           ..write("to $current");
       case FlowEvent():
-        buffer.write("triggered ${component.runtimeType}");
     }
 
     return buffer.toString();
@@ -132,7 +134,8 @@ final class _LogicReacted<
     required super.level,
     required this.logic,
     required this.component,
-  }) : super(logName: "LogicReacted<$TLogic, $TEvent>");
+    required super.logName,
+  });
 
   /// The logic that reacted to the component change.
   final TLogic logic;
@@ -145,7 +148,7 @@ final class _LogicReacted<
     final buffer = StringBuffer(
       "[${logic._feature.runtimeType}.${logic.runtimeType}] "
       "reacted to "
-      "[${component._feature.runtimeType}.${component.runtimeType}] ",
+      "[${component._feature.runtimeType}.${component.runtimeType}]",
     );
 
     switch (component) {
@@ -155,11 +158,10 @@ final class _LogicReacted<
         final current = state.buildDescriptor(state.value);
 
         buffer
-          ..write("update ")
+          ..write(" update ")
           ..write("from $previous ")
           ..write("to $current");
       case FlowEvent():
-        buffer.write("trigged by ${component.runtimeType}");
     }
 
     return buffer.toString();
