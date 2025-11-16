@@ -33,6 +33,8 @@ A powerful and flexible **Event Driven State Management** pattern implementation
 - **🔧 Debugging Tools**: Visual inspector with filtering and search
 - **📋 Cascade Analysis**: Understand data flow and dependencies
 - **⚙️ Hot Reload Support**: Full development workflow integration
+- **📃 Component changes log**: <img width="1003" height="122" alt="image" src="https://github.com/user-attachments/assets/9f9d56ab-d518-4017-9879-46e47bcc3e74" />
+
 
 ## 🚀 Quick Start
 
