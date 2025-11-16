@@ -104,14 +104,19 @@ final class _ComponentChanged<TComponent extends FlowComponent> extends FlowLog 
       "[${component._feature.runtimeType}.${component.runtimeType}] ",
     );
 
-    final state = component as FlowState;
-    final previous = state.buildDescriptor(state.previous);
-    final current = state.buildDescriptor(state.value);
+    switch (component) {
+      case FlowState():
+        final state = component as FlowState;
+        final previous = state.buildDescriptor(state.previous);
+        final current = state.buildDescriptor(state.value);
 
-    buffer
-      ..write("updated ")
-      ..write("from $previous ")
-      ..write("to $current");
+        buffer
+          ..write("updated ")
+          ..write("from $previous ")
+          ..write("to $current");
+      case FlowEvent():
+        buffer.write("triggered ${component.runtimeType}");
+    }
 
     return buffer.toString();
   }
@@ -143,14 +148,19 @@ final class _LogicReacted<
       "[${component._feature.runtimeType}.${component.runtimeType}] ",
     );
 
-    final state = component as FlowState;
-    final previous = state.buildDescriptor(state.previous);
-    final current = state.buildDescriptor(state.value);
+    switch (component) {
+      case FlowState():
+        final state = component as FlowState;
+        final previous = state.buildDescriptor(state.previous);
+        final current = state.buildDescriptor(state.value);
 
-    buffer
-      ..write("update ")
-      ..write("from $previous ")
-      ..write("to $current");
+        buffer
+          ..write("update ")
+          ..write("from $previous ")
+          ..write("to $current");
+      case FlowEvent():
+        buffer.write("trigged by ${component.runtimeType}");
+    }
 
     return buffer.toString();
   }

@@ -6,3 +6,7 @@
 ## 1.0.1
 
 * Improving logging: support for external logging and simpler log messages
+
+## 1.0.2
+
+* Fixed logging on component changes
