@@ -43,6 +43,11 @@ sealed class FlowComponent {
       listener.onComponentChanged(this);
     }
   }
+
+  @override
+  String toString() {
+    return "$runtimeType()";
+  }
 }
 
 /// Represents an event in the Flow architecture.
@@ -128,5 +133,10 @@ abstract class FlowState<TValue> extends FlowComponent {
   /// [context] is the build context in which the widget is built.
   Widget buildInspector(BuildContext context, TValue? value) {
     return Text(buildDescriptor(value));
+  }
+
+  @override
+  String toString() {
+    return "$runtimeType<$TValue>($value)";
   }
 }

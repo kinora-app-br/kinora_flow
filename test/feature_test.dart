@@ -18,7 +18,7 @@ class DummyInitLogic extends FlowFeatureInitializationLogic {
   void initialize() => initialized = true;
 }
 
-class DummyDisposalLogic extends FlutterFeatureDisposalLogic {
+class DummyDisposalLogic extends FlowFeatureDisposalLogic {
   bool tornDown = false;
 
   @override

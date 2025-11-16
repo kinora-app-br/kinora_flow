@@ -168,7 +168,7 @@ Define behavior and business logic:
 - **FlowFrameExecutionLogic**: Frame-based continuous execution
 - **FlowReactiveLogic**: React to component changes
 - **FlowCleanUpLogic**: Cleanup tasks after each frame
-- **FlutterFeatureDisposalLogic**: Cleanup on feature disposal
+- **FlowFeatureDisposalLogic**: Cleanup on feature disposal
 
 #### **Features**
 
@@ -415,7 +415,7 @@ class DatabaseInitLogic extends FlowFeatureInitializationLogic {
   }
 }
 
-class DatabaseDisposalLogic extends FlutterFeatureDisposalLogic {
+class DatabaseDisposalLogic extends FlowFeatureDisposalLogic {
   @override
   Set<Type> get interactsWith => {DatabaseState};
   
@@ -800,7 +800,7 @@ Runs once during feature initialization.
 - `Set<Type> get interactsWith` - Component types this logic sets up
 - `void initialize()` - Initialization implementation
 
-#### `FlutterFeatureDisposalLogic`
+#### `FlowFeatureDisposalLogic`
 
 Runs once during feature disposal.
 

@@ -10,3 +10,7 @@
 ## 1.0.2
 
 * Fixed logging on component changes
+
+## 1.0.3
+
+* Fixed wrong class name (FlowFeatureDisposalLogic)

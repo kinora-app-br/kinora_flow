@@ -17,7 +17,7 @@ abstract class FlowFeature {
 
   /// Set of disposal logic in this feature.
   @visibleForTesting
-  final Set<FlutterFeatureDisposalLogic> disposalLogics = {};
+  final Set<FlowFeatureDisposalLogic> disposalLogics = {};
 
   /// Set of cleanup logic in this feature.
   @visibleForTesting
@@ -84,7 +84,7 @@ abstract class FlowFeature {
     switch (logic) {
       case FlowFeatureInitializationLogic():
         initializeLogics.add(logic);
-      case FlutterFeatureDisposalLogic():
+      case FlowFeatureDisposalLogic():
         disposalLogics.add(logic);
       case FlowCleanUpLogic():
         cleanupLogics.add(logic);

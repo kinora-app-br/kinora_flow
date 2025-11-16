@@ -75,8 +75,8 @@ abstract class FlowCleanUpLogic extends FlowLogic {
 ///
 /// The [dispose] method is called once after the last frame is rendered and
 /// before the application is disposed.
-abstract class FlutterFeatureDisposalLogic extends FlowLogic {
-  FlutterFeatureDisposalLogic();
+abstract class FlowFeatureDisposalLogic extends FlowLogic {
+  FlowFeatureDisposalLogic();
 
   /// Disposal logic for the logic.
   @protected
