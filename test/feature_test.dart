@@ -1,6 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
+import "dart:async";
 
-import 'package:kinora_flow/kinora_flow.dart';
+import "package:flutter_test/flutter_test.dart";
+
+import "package:kinora_flow/kinora_flow.dart";
 
 class DummyState extends FlowState<int> {
   DummyState([super.value = 0]);
@@ -76,6 +78,157 @@ class MultiReactiveLogic extends FlowReactiveLogic {
 
   @override
   void react() => reacted = true;
+}
+
+class DisposableInitLogic extends FlowFeatureInitializationLogic {
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  void initialize() {}
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class DisposableCleanupLogic extends FlowCleanUpLogic {
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  void cleanup() {}
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class DisposableExecuteLogic extends FlowFrameExecutionLogic {
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  void execute(Duration elapsed) {}
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class DisposableReactiveLogic extends FlowReactiveLogic {
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  Set<Type> get reactsTo => {DummyEvent};
+
+  @override
+  void react() {}
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class StreamSubscriptionLogic extends FlowFeatureInitializationLogic {
+  StreamSubscription<int>? subscription;
+  bool disposed = false;
+  int receivedValue = 0;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  void initialize() {
+    final controller = StreamController<int>.broadcast();
+
+    subscription = controller.stream.listen((value) {
+      receivedValue = value;
+    });
+
+    controller.add(42);
+  }
+
+  @override
+  void dispose() {
+    unawaited(subscription?.cancel());
+    subscription = null;
+    disposed = true;
+  }
+}
+
+class CustomDisposableReactiveLogic extends FlowReactiveLogic {
+  CustomDisposableReactiveLogic();
+
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  Set<Type> get reactsTo => {DummyState};
+
+  @override
+  void react() {}
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class StreamListeningInitLogic extends FlowFeatureInitializationLogic {
+  StreamListeningInitLogic(this.controller);
+
+  final StreamController<int> controller;
+  final List<int> receivedValues = [];
+
+  StreamSubscription<int>? subscription;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  void initialize() {
+    subscription = controller.stream.listen(receivedValues.add);
+  }
+
+  @override
+  void dispose() {
+    unawaited(subscription?.cancel());
+    subscription = null;
+  }
+}
+
+class DisposableMultiReactiveLogic extends FlowReactiveLogic {
+  int disposeCallCount = 0;
+
+  @override
+  Set<Type> get interactsWith => {};
+
+  @override
+  Set<Type> get reactsTo => {DummyEvent, DummyState};
+
+  @override
+  void react() {}
+
+  @override
+  void dispose() {
+    disposeCallCount++;
+  }
 }
 
 void main() {
@@ -261,5 +414,191 @@ void main() {
       expect(feature.reactiveLogics[DummyEvent], contains(multiReactiveLogic));
       expect(feature.reactiveLogics[DummyState], contains(multiReactiveLogic));
     });
+
+    test("dispose calls dispose on all initialization logics", () {
+      final feature = TestFeature();
+      final initLogic = DisposableInitLogic();
+
+      feature
+        ..addLogic(initLogic)
+        ..dispose();
+
+      expect(initLogic.disposed, isTrue);
+    });
+
+    test("dispose calls dispose on all cleanup logics", () {
+      final feature = TestFeature();
+      final cleanupLogic = DisposableCleanupLogic();
+
+      feature
+        ..addLogic(cleanupLogic)
+        ..dispose();
+
+      expect(cleanupLogic.disposed, isTrue);
+    });
+
+    test("dispose calls dispose on all execute logics", () {
+      final feature = TestFeature();
+      final executeLogic = DisposableExecuteLogic();
+
+      feature
+        ..addLogic(executeLogic)
+        ..dispose();
+
+      expect(executeLogic.disposed, isTrue);
+    });
+
+    test("dispose calls dispose on all reactive logics", () {
+      final feature = TestFeature();
+      final reactiveLogic = DisposableReactiveLogic();
+
+      feature
+        ..addLogic(reactiveLogic)
+        ..dispose();
+
+      expect(reactiveLogic.disposed, isTrue);
+    });
+
+    test("dispose calls dispose on all logic types", () {
+      final feature = TestFeature();
+      final initLogic = DisposableInitLogic();
+      final disposalLogic = DummyDisposalLogic();
+      final cleanupLogic = DisposableCleanupLogic();
+      final executeLogic = DisposableExecuteLogic();
+      final reactiveLogic = DisposableReactiveLogic();
+
+      feature
+        ..addLogic(initLogic)
+        ..addLogic(disposalLogic)
+        ..addLogic(cleanupLogic)
+        ..addLogic(executeLogic)
+        ..addLogic(reactiveLogic)
+        ..dispose();
+
+      expect(initLogic.disposed, isTrue);
+      expect(disposalLogic.tornDown, isTrue);
+      expect(cleanupLogic.disposed, isTrue);
+      expect(executeLogic.disposed, isTrue);
+      expect(reactiveLogic.disposed, isTrue);
+    });
+
+    test("dispose calls dispose on multiple logics of same type", () {
+      final feature = TestFeature();
+      final initLogic1 = DisposableInitLogic();
+      final initLogic2 = DisposableInitLogic();
+      final executeLogic1 = DisposableExecuteLogic();
+      final executeLogic2 = DisposableExecuteLogic();
+
+      feature
+        ..addLogics({initLogic1, initLogic2, executeLogic1, executeLogic2})
+        ..dispose();
+
+      expect(initLogic1.disposed, isTrue);
+      expect(initLogic2.disposed, isTrue);
+      expect(executeLogic1.disposed, isTrue);
+      expect(executeLogic2.disposed, isTrue);
+    });
+
+    test(
+      "FlowFeatureInitializationLogic disposes StreamSubscription on feature dispose",
+      () async {
+        final feature = TestFeature();
+        final streamLogic = StreamSubscriptionLogic();
+
+        feature
+          ..addLogic(streamLogic)
+          ..initialize();
+
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(streamLogic.receivedValue, 42);
+        expect(streamLogic.disposed, isFalse);
+        expect(streamLogic.subscription, isNotNull);
+
+        feature.dispose();
+
+        expect(streamLogic.disposed, isTrue);
+        expect(streamLogic.subscription, isNull);
+      },
+    );
+
+    test(
+      "FlowFeatureInitializationLogic with StreamSubscription receives events before dispose",
+      () async {
+        final feature = TestFeature();
+        final controller = StreamController<int>.broadcast();
+        final initLogic = StreamListeningInitLogic(controller);
+
+        feature
+          ..addLogic(initLogic)
+          ..initialize();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(initLogic.receivedValues, [1, 2, 3]);
+        expect(initLogic.subscription, isNotNull);
+
+        feature.dispose();
+
+        controller.add(4);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(initLogic.receivedValues, [1, 2, 3]);
+        expect(initLogic.subscription, isNull);
+      },
+    );
+
+    test(
+      "dispose handles multiple reactive logics with different component types",
+      () {
+        final feature = TestFeature();
+        final reactiveLogic1 = DisposableReactiveLogic();
+        final reactiveLogic2 = MultiReactiveLogic();
+        final customReactiveLogic = CustomDisposableReactiveLogic();
+
+        feature
+          ..addLogic(reactiveLogic1)
+          ..addLogic(reactiveLogic2)
+          ..addLogic(customReactiveLogic)
+          ..dispose();
+
+        expect(reactiveLogic1.disposed, isTrue);
+        expect(customReactiveLogic.disposed, isTrue);
+      },
+    );
+
+    test("dispose is safe to call multiple times", () {
+      final feature = TestFeature();
+      final initLogic = DisposableInitLogic();
+      final executeLogic = DisposableExecuteLogic();
+
+      feature
+        ..addLogics({initLogic, executeLogic})
+        ..dispose();
+
+      expect(initLogic.disposed, isTrue);
+      expect(executeLogic.disposed, isTrue);
+
+      feature.dispose();
+
+      expect(initLogic.disposed, isTrue);
+      expect(executeLogic.disposed, isTrue);
+    });
+
+    test(
+      "dispose calls dispose only once on reactive logic that reacts to multiple component types",
+      () {
+        final feature = TestFeature();
+        final multiReactiveLogic = DisposableMultiReactiveLogic();
+
+        feature
+          ..addLogic(multiReactiveLogic)
+          ..dispose();
+
+        expect(multiReactiveLogic.disposeCallCount, 1);
+      },
+    );
   });
 }

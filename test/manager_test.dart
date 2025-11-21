@@ -71,6 +71,10 @@ class ComponentReactiveLogic extends FlowReactiveLogic {
   void react() => reacted = true;
 }
 
+class EmptyFeature extends FlowFeature {
+  EmptyFeature();
+}
+
 void main() {
   group("FlowManager", () {
     test("addFeature adds feature and components", () {
@@ -311,5 +315,47 @@ void main() {
       expect(features, contains(feature));
       expect(features.length, 1);
     });
+
+    test("getComponentOrNull checks all local features before parent manager", () {
+      final parentManager = FlowManager();
+      final parentFeature = DummyFeature();
+
+      parentManager.addFeature(parentFeature);
+
+      final parentComponent = parentFeature.getComponent<DummyState>();
+      final childManager = FlowManager(parentManager: parentManager);
+      final feature1 = EmptyFeature();
+      final feature2 = DummyFeature();
+
+      childManager.addFeatures({feature1, feature2});
+
+      final localComponent = feature2.getComponent<DummyState>();
+      final result = childManager.getComponentOrNull<DummyState>();
+
+      expect(result, isNotNull);
+      expect(result, equals(localComponent));
+      expect(result, isNot(equals(parentComponent)));
+    });
+
+    test(
+      "getComponentOrNull falls back to parent manager when no local features have component",
+      () {
+        final parentManager = FlowManager();
+        final parentFeature = DummyFeature();
+
+        parentManager.addFeature(parentFeature);
+
+        final parentComponent = parentFeature.getComponent<DummyState>();
+        final childManager = FlowManager(parentManager: parentManager);
+        final emptyFeature = EmptyFeature();
+
+        childManager.addFeature(emptyFeature);
+
+        final result = childManager.getComponentOrNull<DummyState>();
+
+        expect(result, isNotNull);
+        expect(result, equals(parentComponent));
+      },
+    );
   });
 }

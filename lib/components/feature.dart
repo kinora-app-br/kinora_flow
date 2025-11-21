@@ -122,7 +122,13 @@ abstract class FlowFeature {
   /// Tears down the features.
   @visibleForTesting
   void dispose() {
-    for (final logic in disposalLogics) {
+    for (final logic in {
+      ...initializeLogics,
+      ...disposalLogics,
+      ...cleanupLogics,
+      ...executeLogics,
+      ...reactiveLogics.values.expand((l) => l),
+    }) {
       logic.dispose();
     }
   }
@@ -169,13 +175,25 @@ abstract class FlowFeature {
   }
 
   /// Gets an component of type [TComponent] from this feature if it exists.
-  TComponent getComponent<TComponent extends FlowComponent>() {
+  ///
+  /// Returns null if the component is not found.
+  TComponent? getComponentOrNull<TComponent extends FlowComponent>() {
     for (final component in components) {
       if (component is TComponent) {
         return component;
       }
     }
 
+    return null;
+  }
+
+  /// Gets an component of type [TComponent] from this feature if it exists.
+  ///
+  /// Throws a [StateError] if the component is not found.
+  TComponent getComponent<TComponent extends FlowComponent>() {
+    final component = getComponentOrNull<TComponent>();
+
+    if (component != null) return component;
     throw StateError("Component of type $TComponent not found");
   }
 }

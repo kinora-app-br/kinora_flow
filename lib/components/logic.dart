@@ -9,10 +9,7 @@ sealed class FlowLogic {
   /// This set should be overridden in subclasses to specify the types of
   /// components that this logic can interact with.
   ///
-  /// This is used to optimize the logic's execution by filtering components
-  /// that are relevant to the logic and avoid unnecessary processing.
-  ///
-  /// This is also used for debugging purposes to understand which components
+  /// This is used for debugging purposes to understand which components
   /// are being processed by the logic.
   Set<Type> get interactsWith => const {};
 
@@ -30,6 +27,10 @@ sealed class FlowLogic {
   /// The manager that this logic is associated with.
   @protected
   FlowManager get manager => _feature.manager;
+
+  /// Feature is disposing this logic.
+  @protected
+  void dispose() {}
 }
 
 /// Base class for feature initializion logic.
@@ -79,7 +80,7 @@ abstract class FlowFeatureDisposalLogic extends FlowLogic {
   FlowFeatureDisposalLogic();
 
   /// Disposal logic for the logic.
-  @protected
+  @override
   void dispose();
 }
 

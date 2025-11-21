@@ -87,18 +87,30 @@ final class FlowManager implements IFlowComponentListener {
 
   /// Gets an component of type [TComponent] from all features.
   ///
-  /// Throws a [StateError] if the component is not found.
-  TComponent getComponent<TComponent extends FlowComponent>() {
+  /// Returns null if the component is not found.
+  TComponent? getComponentOrNull<TComponent extends FlowComponent>() {
     for (final feature in features) {
-      try {
-        return feature.getComponent<TComponent>();
-      } catch (_) {
-        if (_parentManager != null) {
-          return _parentManager.getComponent<TComponent>();
-        }
-      }
+      final component = feature.getComponentOrNull<TComponent>();
+
+      if (component != null) return component;
     }
 
+    if (_parentManager != null) {
+      final parentComponent = _parentManager.getComponentOrNull<TComponent>();
+
+      if (parentComponent != null) return parentComponent;
+    }
+
+    return null;
+  }
+
+  /// Gets an component of type [TComponent] from all features.
+  ///
+  /// Throws a [StateError] if the component is not found.
+  TComponent getComponent<TComponent extends FlowComponent>() {
+    final component = getComponentOrNull<TComponent>();
+
+    if (component != null) return component;
     throw StateError("Component of type $TComponent not found");
   }
 }
