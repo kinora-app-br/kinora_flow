@@ -24,3 +24,7 @@
 
 * Added support for `dispose` in all types of Logic (it will be called once a `FlowFeature` is disposed)
   This allows, for example, to get a `StreamSubscription<T>` and then close it when it is no longer needed.
+
+### 1.1.1
+
+* Fixed the order of logic disposal and potentially duplicate `dispose` calls

@@ -122,13 +122,15 @@ abstract class FlowFeature {
   /// Tears down the features.
   @visibleForTesting
   void dispose() {
-    for (final logic in {
+    final allLogics = <FlowLogic>{
       ...initializeLogics,
-      ...disposalLogics,
-      ...cleanupLogics,
-      ...executeLogics,
       ...reactiveLogics.values.expand((l) => l),
-    }) {
+      ...executeLogics,
+      ...cleanupLogics,
+      ...disposalLogics,
+    };
+
+    for (final logic in allLogics.toList().reversed) {
       logic.dispose();
     }
   }
