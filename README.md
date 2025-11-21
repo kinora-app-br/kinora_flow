@@ -8,6 +8,46 @@
 
 A powerful and flexible **Event Driven State Management** pattern implementation for Flutter applications. This package provides a reactive state management solution that promotes clean architecture, separation of concerns, and scalable application development, based on the work of  [Event-Component-System](https://github.com/FlameOfUdun/flutter_event_component_system) by [Ehsan Rashidi](https://github.com/FlameOfUdun).
 
+## 🆚 Why Choose Kinora Flow Over Bloc?
+
+While both Kinora Flow and Bloc are popular state management solutions in the Flutter ecosystem, Kinora Flow offers distinct advantages that make it particularly well-suited for complex, feature-rich applications:
+
+### 🧩 Feature-Based Organization with Dynamic Lifecycle Management
+
+**Kinora Flow** introduces a powerful **Features** system that allows you to group related logic, state, and events into cohesive modules. This goes beyond simple code organization:
+
+- **Scoped Feature Management**: Features can be pushed and popped dynamically through nested `FlowScope` widgets. When a `FlowScope` is removed from the widget tree, all its features are automatically disposed, preventing memory leaks and ensuring clean resource management.
+
+- **Inheritance Through Scopes**: Child scopes automatically inherit all features from their parent scopes, allowing for hierarchical feature composition while maintaining clear boundaries.
+
+- **Automatic Cleanup**: Unlike manually managing Bloc instances, Kinora Flow automatically handles feature disposal when scopes are removed, reducing boilerplate and potential memory leaks.
+
+**Bloc**, while excellent for state management, doesn't provide this level of feature-based organization. Bloc instances must be manually provided via `BlocProvider` and disposed, requiring developers to carefully manage lifecycle and potential memory leaks, especially in complex navigation scenarios.
+
+### ⚙️ Built-in Initialization Logic
+
+**Kinora Flow** provides dedicated **FlowFeatureInitializationLogic** that runs automatically when a feature is added to a manager:
+
+- **Automatic Execution**: Initialization logic runs once after the first frame is rendered, ensuring your feature is properly set up before use.
+
+- **Lifecycle Integration**: Works seamlessly with the feature lifecycle, running before any reactive logic executes.
+
+- **Type-Safe Setup**: Initialization logic declares which components it interacts with, making dependencies explicit and verifiable.
+
+**Bloc** doesn't have a built-in initialization mechanism. While you can perform setup in the Bloc constructor or override methods, there's no standardized, lifecycle-aware initialization pattern that runs at a specific point in the feature lifecycle. This can lead to timing issues and requires manual coordination.
+
+### 📊 Summary
+
+| Feature | Kinora Flow | Bloc |
+|---------|-------------|------|
+| Feature Grouping | ✅ Built-in with automatic lifecycle | ❌ Manual management required |
+| Scoped Features | ✅ Automatic via nested scopes | ❌ Manual via BlocProvider |
+| Initialization Logic | ✅ FlowFeatureInitializationLogic | ❌ Constructor-based only |
+| Automatic Disposal | ✅ Automatic on scope removal | ⚠️ Manual disposal required |
+| Feature Inheritance | ✅ Automatic through scopes | ❌ Manual provider nesting |
+
+These differences make Kinora Flow particularly powerful for applications that need to manage multiple features with complex lifecycles, where features can be dynamically added and removed as users navigate through the app.
+
 ## 🌟 Features
 
 ### Core Architecture
@@ -90,7 +130,7 @@ class IncrementCounterLogic extends FlowReactiveLogic {
 #### 3. Organize into Features
 
 ```dart
-class CounterFeature extends Feature {
+class CounterFeature extends FlowFeature {
   CounterFeature() {
     // Add components (States and Events)
     addComponents({
@@ -175,7 +215,7 @@ Define behavior and business logic:
 Organize related components and logic into cohesive modules:
 
 ```dart
-class UserAuthFeature extends Feature {
+class UserAuthFeature extends FlowFeature {
   UserAuthFeature() {
     // States
     addComponents({
@@ -573,7 +613,7 @@ class LoginUserReactiveLogic extends FlowReactiveLogic {
 }
 
 // Feature
-class UserAuthFeature extends Feature {
+class UserAuthFeature extends FlowFeature {
   UserAuthFeature() {
     addComponents({
       AuthState(),
@@ -651,7 +691,7 @@ test('state notifies listeners on change', () {
 
 ```dart
 test('reactive logic processes events', () {
-  final manager = Manager();
+  final manager = FlowManager();
   final feature = TestFeature();
   final logic = TestReactiveLogic();
   
@@ -706,14 +746,14 @@ testWidgets('Flow widget rebuilds on state change', (tester) async {
 
 ### Core Classes
 
-#### `Component`
+#### `FlowComponent`
 
 Base class for all components in the system.
 
 **Key Methods:**
 
-- `addListener(ComponentListener listener)` - Add change listener
-- `removeListener(ComponentListener listener)` - Remove listener
+- `addListener(IFlowComponentListener listener)` - Add change listener
+- `removeListener(IFlowComponentListener listener)` - Remove listener
 - `buildInspector(BuildContext context)` - Custom inspector widget
 
 #### `FlowState<T>`
@@ -740,11 +780,11 @@ Container for organizing related components and logic.
 
 **Key Methods:**
 
-- `addComponent(Component component)` - Add component to feature
-- `addComponents(Set<Component> components)` - Add multiple components
-- `addLogic(Logic logic)` - Add logic to feature
-- `addLogics(Set<Logic> logics)` - Add multiple logics to feature
-- `getComponent<T extends Component>()` - Retrieve component by type
+- `addComponent(FlowComponent component)` - Add component to feature
+- `addComponents(Set<FlowComponent> components)` - Add multiple components
+- `addLogic(FlowLogic logic)` - Add logic to feature
+- `addLogics(Set<FlowLogic> logics)` - Add multiple logics to feature
+- `getComponent<T extends FlowComponent>()` - Retrieve component by type
 
 #### `FlowManager`
 
@@ -752,8 +792,8 @@ Central coordinator for the entire system.
 
 **Key Methods:**
 
-- `addFeature(Feature feature)` - Add feature to manager
-- `getComponent<T extends Component>()` - Get component from any feature
+- `addFeature(FlowFeature feature)` - Add feature to manager
+- `getComponent<T extends FlowComponent>()` - Get component from any feature
 - `initialize()` - Initialize all features
 - `teardown()` - Cleanup all features
 
@@ -763,9 +803,9 @@ Widget-level interface for system access.
 
 **Key Methods:**
 
-- `get<T extends Component>()` - Get component without watching
-- `watch<T extends Component>()` - Watch component for changes
-- `listen<T extends Component>(Function(T) listener)` - Listen to component changes
+- `get<T extends FlowComponent>()` - Get component without watching
+- `watch<T extends FlowComponent>()` - Watch component for changes
+- `listen<T extends FlowComponent>(Function(T) listener)` - Listen to component changes
 - `onEnter(Function() callback)` - Widget lifecycle callback
 - `onExit(Function() callback)` - Widget disposal callback
 
@@ -828,7 +868,7 @@ Provides scoped Flow context to widget tree.
 
 ```dart
 FlowScope({
-  required Set<Feature> features,
+  required Set<FlowFeature> features,
   required Widget child,
 })
 ```
@@ -884,7 +924,7 @@ Static analysis of system structure.
 
 **Key Methods:**
 
-- `static Analysis analyze(Manager manager)` - Analyze system
+- `static Analysis analyze(FlowManager manager)` - Analyze system
 - Analysis methods for cascade flows and circular dependencies
 
 #### `Inspector`
@@ -1060,7 +1100,7 @@ class LoginLogic extends FlowReactiveLogic {
 ```dart
 // ✅ Good: Test logic in isolation
 test('login logic authenticates user', () async {
-  final manager = Manager();
+  final manager = FlowManager();
   final feature = TestAuthFeature();
 
   manager.addFeature(feature);
