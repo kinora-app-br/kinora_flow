@@ -255,8 +255,7 @@ class StateWatchingInitLogic extends FlowFeatureInitializationLogic {
   }
 }
 
-class StateWatchingWithCurrentValueInitLogic
-    extends FlowFeatureInitializationLogic {
+class StateWatchingWithCurrentValueInitLogic extends FlowFeatureInitializationLogic {
   StateWatchingWithCurrentValueInitLogic(this.state);
 
   final DummyState state;
@@ -655,7 +654,7 @@ void main() {
       "FlowFeatureInitializationLogic can use state.onChanged to watch state changes",
       () {
         final feature = TestFeature();
-        final state = DummyState(0);
+        final state = DummyState();
         final logic = StateWatchingInitLogic(state);
 
         feature
@@ -680,7 +679,7 @@ void main() {
       "FlowFeatureInitializationLogic state.onChanged disposes on feature dispose",
       () {
         final feature = TestFeature();
-        final state = DummyState(0);
+        final state = DummyState();
         final logic = StateWatchingInitLogic(state);
 
         feature
@@ -711,7 +710,9 @@ void main() {
           ..addLogic(logic)
           ..initialize();
 
-        expect(logic.receivedValues, [42]); // Should receive current value immediately
+        expect(logic.receivedValues, [
+          42,
+        ]); // Should receive current value immediately
 
         state.update(100);
         expect(logic.receivedValues, [42, 100]);
