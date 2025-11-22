@@ -231,6 +231,56 @@ class DisposableMultiReactiveLogic extends FlowReactiveLogic {
   }
 }
 
+class StateWatchingInitLogic extends FlowFeatureInitializationLogic {
+  StateWatchingInitLogic(this.state);
+
+  final DummyState state;
+  final List<int> receivedValues = [];
+  void Function()? _unsubscribe;
+  bool disposed = false;
+
+  @override
+  Set<Type> get interactsWith => {DummyState};
+
+  @override
+  void initialize() {
+    _unsubscribe = state.onChanged(receivedValues.add);
+  }
+
+  @override
+  void dispose() {
+    _unsubscribe?.call();
+    _unsubscribe = null;
+    disposed = true;
+  }
+}
+
+class StateWatchingWithCurrentValueInitLogic
+    extends FlowFeatureInitializationLogic {
+  StateWatchingWithCurrentValueInitLogic(this.state);
+
+  final DummyState state;
+  final List<int> receivedValues = [];
+  void Function()? _unsubscribe;
+
+  @override
+  Set<Type> get interactsWith => {DummyState};
+
+  @override
+  void initialize() {
+    _unsubscribe = state.onChanged(
+      receivedValues.add,
+      triggerWithCurrentValue: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    _unsubscribe?.call();
+    _unsubscribe = null;
+  }
+}
+
 void main() {
   group("FlowFeature", () {
     test("addComponent and getComponent", () {
@@ -598,6 +648,73 @@ void main() {
           ..dispose();
 
         expect(multiReactiveLogic.disposeCallCount, 1);
+      },
+    );
+
+    test(
+      "FlowFeatureInitializationLogic can use state.onChanged to watch state changes",
+      () {
+        final feature = TestFeature();
+        final state = DummyState(0);
+        final logic = StateWatchingInitLogic(state);
+
+        feature
+          ..addComponent(state)
+          ..addLogic(logic)
+          ..initialize();
+
+        expect(logic.receivedValues, isEmpty);
+
+        state.update(10);
+        expect(logic.receivedValues, [10]);
+
+        state.update(20);
+        expect(logic.receivedValues, [10, 20]);
+
+        state.update(30);
+        expect(logic.receivedValues, [10, 20, 30]);
+      },
+    );
+
+    test(
+      "FlowFeatureInitializationLogic state.onChanged disposes on feature dispose",
+      () {
+        final feature = TestFeature();
+        final state = DummyState(0);
+        final logic = StateWatchingInitLogic(state);
+
+        feature
+          ..addComponent(state)
+          ..addLogic(logic)
+          ..initialize();
+
+        state.update(10);
+        expect(logic.receivedValues, [10]);
+
+        feature.dispose();
+
+        state.update(20);
+        expect(logic.receivedValues, [10]); // Should not receive 20 after dispose
+        expect(logic.disposed, isTrue);
+      },
+    );
+
+    test(
+      "FlowFeatureInitializationLogic state.onChanged with triggerWithCurrentValue",
+      () {
+        final feature = TestFeature();
+        final state = DummyState(42);
+        final logic = StateWatchingWithCurrentValueInitLogic(state);
+
+        feature
+          ..addComponent(state)
+          ..addLogic(logic)
+          ..initialize();
+
+        expect(logic.receivedValues, [42]); // Should receive current value immediately
+
+        state.update(100);
+        expect(logic.receivedValues, [42, 100]);
       },
     );
   });
