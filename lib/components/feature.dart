@@ -133,6 +133,10 @@ abstract class FlowFeature {
     for (final logic in allLogics.toList().reversed) {
       logic.dispose();
     }
+
+    for (final component in components) {
+      component.dispose();
+    }
   }
 
   /// Cleans up the features.

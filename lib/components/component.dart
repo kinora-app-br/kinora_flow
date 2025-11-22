@@ -44,6 +44,8 @@ sealed class FlowComponent {
     }
   }
 
+  void dispose() {}
+
   @override
   String toString() {
     return "$runtimeType()";
@@ -79,6 +81,8 @@ abstract class FlowEvent extends FlowComponent {
 abstract class FlowState<TValue> extends FlowComponent {
   FlowState(TValue value) : _value = value;
 
+  final Set<void Function(TValue value)> _listeners = {};
+
   /// The current value of the component.
   TValue _value;
 
@@ -111,6 +115,10 @@ abstract class FlowState<TValue> extends FlowComponent {
 
     if (notify) {
       notifyListeners();
+
+      for (final listener in _listeners) {
+        listener(_value);
+      }
     }
   }
 
@@ -119,6 +127,19 @@ abstract class FlowState<TValue> extends FlowComponent {
   /// This is equivalent to calling [update] with default parameters.
   set value(TValue value) {
     update(value);
+  }
+
+  void Function() onChanged(
+    void Function(TValue value) onDataChanged, {
+    bool triggerWithCurrentValue = false,
+  }) {
+    _listeners.add(onDataChanged);
+
+    if (triggerWithCurrentValue) {
+      onDataChanged(_value);
+    }
+
+    return () => _listeners.remove(onDataChanged);
   }
 
   /// Builds a string descriptor for the component's value in [FlowInspector].
@@ -138,5 +159,10 @@ abstract class FlowState<TValue> extends FlowComponent {
   @override
   String toString() {
     return "$runtimeType<$TValue>($value)";
+  }
+
+  @override
+  void dispose() {
+    _listeners.clear();
   }
 }

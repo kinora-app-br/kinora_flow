@@ -28,3 +28,8 @@
 ### 1.1.1
 
 * Fixed the order of logic disposal and potentially duplicate `dispose` calls
+
+## 1.2.0
+
+* Added support for listening on state changes inside `FlowLogic`
+* All components have now a `dispose` method
