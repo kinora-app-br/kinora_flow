@@ -171,11 +171,40 @@ abstract class FlowReactiveLogic extends FlowLogic {
 /// // Dispatch from UI or other logic
 /// flow.dispatch(SaveCustomerEvent(newCustomer));
 /// ```
+///
+/// For sealed classes and inheritance hierarchies:
+/// ```dart
+/// sealed class IntentEvent {}
+/// class AddIntentEvent extends IntentEvent { final String data; }
+/// class EditIntentEvent extends IntentEvent { final String id; }
+///
+/// class IntentLogic extends FlowEventLogic<IntentEvent> {
+///   @override
+///   Set<Type> get reactsTo => {AddIntentEvent, EditIntentEvent};
+///
+///   @override
+///   void react(IntentEvent event) {
+///     switch (event) {
+///       case AddIntentEvent(): // handle add
+///       case EditIntentEvent(): // handle edit
+///     }
+///   }
+/// }
+/// ```
 abstract class FlowEventLogic<T> extends FlowLogic {
   FlowEventLogic();
 
-  /// The type of event this logic responds to.
-  Type get eventType => T;
+  /// The set of event types that this logic reacts to.
+  ///
+  /// By default, this returns {T}, but can be overridden to handle
+  /// multiple event types, useful for sealed class hierarchies.
+  ///
+  /// Example with sealed classes:
+  /// ```dart
+  /// @override
+  /// Set<Type> get reactsTo => {AddIntentEvent, EditIntentEvent};
+  /// ```
+  Set<Type> get reactsTo => {T};
 
   /// Whether the logic should react to this specific event instance.
   ///

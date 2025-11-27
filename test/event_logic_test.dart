@@ -1,4 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
+
 import "package:kinora_flow/kinora_flow.dart";
 
 // Test event classes (immutable)
@@ -7,23 +8,20 @@ class SimpleEvent {
 }
 
 class DataEvent {
+  const DataEvent(this.data, this.value);
   final String data;
   final int value;
-
-  const DataEvent(this.data, this.value);
 }
 
 class CustomerEvent {
+  const CustomerEvent(this.name, this.email);
   final String name;
   final String email;
-
-  const CustomerEvent(this.name, this.email);
 }
 
 class CountEvent {
-  final int count;
-
   const CountEvent(this.count);
+  final int count;
 }
 
 // Test logic classes
@@ -62,7 +60,7 @@ class FilteredCountLogic extends FlowEventLogic<CountEvent> {
   @override
   bool reactsIf(CountEvent event) {
     // Only react to even numbers
-    return event.count % 2 == 0;
+    return event.count.isEven;
   }
 
   @override
@@ -105,6 +103,33 @@ class DummyReactiveLogic extends FlowReactiveLogic {
   void react() => reacted = true;
 }
 
+// Sealed class hierarchy for testing inheritance
+sealed class IntentEvent {}
+
+class AddIntentEvent extends IntentEvent {
+  AddIntentEvent(this.data);
+  final String data;
+}
+
+class EditIntentEvent extends IntentEvent {
+  EditIntentEvent(this.id);
+
+  // ignore: unreachable_from_main
+  final String id;
+}
+
+class IntentLogic extends FlowEventLogic<IntentEvent> {
+  final List<IntentEvent> receivedEvents = [];
+
+  @override
+  Set<Type> get reactsTo => {AddIntentEvent, EditIntentEvent};
+
+  @override
+  void react(IntentEvent event) {
+    receivedEvents.add(event);
+  }
+}
+
 // Test feature
 class TestFeature extends FlowFeature {
   TestFeature();
@@ -134,9 +159,10 @@ void main() {
       final manager = FlowManager();
 
       feature.addLogic(logic);
-      manager.addFeature(feature);
 
-      manager.dispatch(const DataEvent("test", 42));
+      manager
+        ..addFeature(feature)
+        ..dispatch(const DataEvent("test", 42));
 
       expect(logic.receivedEvents.length, 1);
       expect(logic.receivedEvents[0].data, "test");
@@ -149,11 +175,12 @@ void main() {
       final manager = FlowManager();
 
       feature.addLogic(logic);
-      manager.addFeature(feature);
 
-      manager.dispatch(const DataEvent("first", 1));
-      manager.dispatch(const DataEvent("second", 2));
-      manager.dispatch(const DataEvent("third", 3));
+      manager
+        ..addFeature(feature)
+        ..dispatch(const DataEvent("first", 1))
+        ..dispatch(const DataEvent("second", 2))
+        ..dispatch(const DataEvent("third", 3));
 
       expect(logic.receivedEvents.length, 3);
       expect(logic.receivedEvents[0].data, "first");
@@ -167,11 +194,13 @@ void main() {
       final logic2 = MultipleReactionLogic();
       final manager = FlowManager();
 
-      feature.addLogic(logic1);
-      feature.addLogic(logic2);
-      manager.addFeature(feature);
+      feature
+        ..addLogic(logic1)
+        ..addLogic(logic2);
 
-      manager.dispatch(const DataEvent("test", 100));
+      manager
+        ..addFeature(feature)
+        ..dispatch(const DataEvent("test", 100));
 
       expect(logic1.receivedEvents.length, 1);
       expect(logic2.reactionCount, 1);
@@ -183,11 +212,14 @@ void main() {
       final dataLogic = DataEventLogic();
       final manager = FlowManager();
 
-      feature.addLogic(simpleLogic);
-      feature.addLogic(dataLogic);
-      manager.addFeature(feature);
+      feature
+        ..addLogic(simpleLogic)
+        ..addLogic(dataLogic);
 
-      manager.dispatch(const SimpleEvent());
+      manager
+        ..addFeature(feature)
+        ..dispatch(const SimpleEvent());
+
       expect(simpleLogic.reacted, isTrue);
       expect(dataLogic.receivedEvents.length, 0);
 
@@ -201,27 +233,28 @@ void main() {
       final manager = FlowManager();
 
       feature.addLogic(logic);
-      manager.addFeature(feature);
-
-      // Dispatch odd numbers (should be filtered out)
-      manager.dispatch(const CountEvent(1));
-      manager.dispatch(const CountEvent(3));
-      manager.dispatch(const CountEvent(5));
+      manager
+        ..addFeature(feature)
+        // Dispatch odd numbers (should be filtered out)
+        ..dispatch(const CountEvent(1))
+        ..dispatch(const CountEvent(3))
+        ..dispatch(const CountEvent(5));
 
       expect(logic.receivedCounts.length, 0);
 
       // Dispatch even numbers (should pass filter)
-      manager.dispatch(const CountEvent(2));
-      manager.dispatch(const CountEvent(4));
+      manager
+        ..dispatch(const CountEvent(2))
+        ..dispatch(const CountEvent(4));
 
       expect(logic.receivedCounts.length, 2);
       expect(logic.receivedCounts, [2, 4]);
     });
 
-    test("eventType returns correct type", () {
+    test("reactsTo returns correct types", () {
       final logic = DataEventLogic();
 
-      expect(logic.eventType, DataEvent);
+      expect(logic.reactsTo, {DataEvent});
     });
 
     test("dispose is called on event logic", () {
@@ -240,11 +273,10 @@ void main() {
     });
 
     test("logicCount includes event logics", () {
-      final feature = TestFeature();
-
-      feature.addLogic(SimpleEventLogic());
-      feature.addLogic(DataEventLogic());
-      feature.addLogic(CustomerEventLogic());
+      final feature = TestFeature()
+        ..addLogic(SimpleEventLogic())
+        ..addLogic(DataEventLogic())
+        ..addLogic(CustomerEventLogic());
 
       expect(feature.logicCount, 3);
     });
@@ -272,9 +304,10 @@ void main() {
       feature.addLogic(logic);
       manager.addFeature(feature);
 
-      final context = FlowContext(manager, () {});
-
-      context.dispatch(const CustomerEvent("John", "john@example.com"));
+      FlowContext(
+        manager,
+        () {},
+      ).dispatch(const CustomerEvent("John", "john@example.com"));
 
       expect(logic.receivedEvents.length, 1);
       expect(logic.receivedEvents[0].name, "John");
@@ -291,10 +324,10 @@ void main() {
       feature1.addLogic(logic1);
       feature2.addLogic(logic2);
 
-      manager.addFeature(feature1);
-      manager.addFeature(feature2);
-
-      manager.dispatch(const SimpleEvent());
+      manager
+        ..addFeature(feature1)
+        ..addFeature(feature2)
+        ..dispatch(const SimpleEvent());
 
       expect(logic1.reacted, isTrue);
       expect(logic2.reacted, isTrue);
@@ -308,8 +341,10 @@ void main() {
       final logic = DummyReactiveLogic();
       final manager = FlowManager();
 
-      feature.addComponent(event);
-      feature.addLogic(logic);
+      feature
+        ..addComponent(event)
+        ..addLogic(logic);
+
       manager.addFeature(feature);
 
       expect(logic.reacted, isFalse);
@@ -326,9 +361,11 @@ void main() {
       final eventLogic = SimpleEventLogic();
       final manager = FlowManager();
 
-      feature.addComponent(event);
-      feature.addLogic(reactiveLogic);
-      feature.addLogic(eventLogic);
+      feature
+        ..addComponent(event)
+        ..addLogic(reactiveLogic)
+        ..addLogic(eventLogic);
+
       manager.addFeature(feature);
 
       // Trigger old-style event
@@ -353,9 +390,10 @@ void main() {
 
       const event = DataEvent("shared", 999);
 
-      manager.dispatch(event);
-      manager.dispatch(event);
-      manager.dispatch(event);
+      manager
+        ..dispatch(event)
+        ..dispatch(event)
+        ..dispatch(event);
 
       expect(logic.receivedEvents.length, 3);
       expect(logic.receivedEvents.every((e) => e.data == "shared"), isTrue);
@@ -378,9 +416,10 @@ void main() {
       final logic2 = DisposableEventLogic();
       final logic3 = DisposableEventLogic();
 
-      feature.addLogic(logic1);
-      feature.addLogic(logic2);
-      feature.addLogic(logic3);
+      feature
+        ..addLogic(logic1)
+        ..addLogic(logic2)
+        ..addLogic(logic3);
 
       expect(logic1.disposed, isFalse);
       expect(logic2.disposed, isFalse);
@@ -391,6 +430,71 @@ void main() {
       expect(logic1.disposed, isTrue);
       expect(logic2.disposed, isTrue);
       expect(logic3.disposed, isTrue);
+    });
+  });
+
+  group("Sealed Classes and Inheritance", () {
+    test("logic responds to subclasses when reactsTo includes them", () {
+      final feature = TestFeature();
+      final logic = IntentLogic();
+      final manager = FlowManager();
+
+      feature.addLogic(logic);
+
+      manager
+        ..addFeature(feature)
+        // Dispatch subclass events
+        ..dispatch(AddIntentEvent("test data"))
+        ..dispatch(EditIntentEvent("edit-123"));
+
+      expect(logic.receivedEvents.length, 2);
+      expect(logic.receivedEvents[0], isA<AddIntentEvent>());
+      expect(logic.receivedEvents[1], isA<EditIntentEvent>());
+    });
+
+    test("logic receives correct data from subclass events", () {
+      final feature = TestFeature();
+      final logic = IntentLogic();
+      final manager = FlowManager();
+
+      feature.addLogic(logic);
+
+      manager
+        ..addFeature(feature)
+        ..dispatch(AddIntentEvent("my data"));
+
+      final event = logic.receivedEvents[0] as AddIntentEvent;
+
+      expect(event.data, "my data");
+    });
+
+    test("multiple subclass events trigger same logic", () {
+      final feature = TestFeature();
+      final logic = IntentLogic();
+      final manager = FlowManager();
+
+      feature.addLogic(logic);
+
+      manager
+        ..addFeature(feature)
+        // Dispatch multiple events of different subtypes
+        ..dispatch(AddIntentEvent("first"))
+        ..dispatch(AddIntentEvent("second"))
+        ..dispatch(EditIntentEvent("edit-1"))
+        ..dispatch(AddIntentEvent("third"))
+        ..dispatch(EditIntentEvent("edit-2"));
+
+      expect(logic.receivedEvents.length, 5);
+
+      expect(
+        logic.receivedEvents.whereType<AddIntentEvent>().length,
+        3,
+      );
+
+      expect(
+        logic.receivedEvents.whereType<EditIntentEvent>().length,
+        2,
+      );
     });
   });
 }

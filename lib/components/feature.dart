@@ -56,9 +56,12 @@ abstract class FlowFeature {
     this.manager = manager;
 
     // Register all event logics with the manager's event bus
+    // Iterate through each event type that a logic reacts to, and register all
+    // logics associated with that event type in the manager's event bus.
     for (final entry in eventLogics.entries) {
       final eventType = entry.key;
       final logics = entry.value;
+
       manager._eventLogics.putIfAbsent(eventType, () => {}).addAll(logics);
     }
   }
@@ -103,8 +106,9 @@ abstract class FlowFeature {
       case FlowFrameExecutionLogic():
         executeLogics.add(logic);
       case FlowEventLogic():
-        final eventType = logic.eventType;
-        eventLogics.putIfAbsent(eventType, () => {}).add(logic);
+        for (final eventType in logic.reactsTo) {
+          eventLogics.putIfAbsent(eventType, () => {}).add(logic);
+        }
       case FlowReactiveLogic():
         for (final component in logic.reactsTo) {
           reactiveLogics.putIfAbsent(component, () => {}).add(logic);
