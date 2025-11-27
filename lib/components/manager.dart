@@ -10,6 +10,9 @@ final class FlowManager implements IFlowComponentListener {
   @visibleForTesting
   final Set<FlowFeature> features = {};
 
+  /// Map of event logics by event type.
+  final Map<Type, Set<FlowEventLogic<dynamic>>> _eventLogics = {};
+
   /// Unmodifiable set of all components across all features.
   Set<FlowComponent> get components {
     final expanded = features.expand((feature) => feature.components);
@@ -33,6 +36,24 @@ final class FlowManager implements IFlowComponentListener {
   void addFeatures(Set<FlowFeature> features) {
     for (final feature in features) {
       addFeature(feature);
+    }
+  }
+
+  /// Dispatch an event to all registered event logics.
+  ///
+  /// The event will be delivered to all [FlowEventLogic] instances
+  /// that are registered to handle events of this type.
+  @visibleForTesting
+  void dispatch(Object event) {
+    final logics = _eventLogics[event.runtimeType];
+    if (logics == null || logics.isEmpty) return;
+
+    for (final logic in logics) {
+      // Dynamic cast to call reactsIf and react with the event
+      final dynamic typedLogic = logic;
+      if (typedLogic.reactsIf(event) as bool) {
+        typedLogic.react(event);
+      }
     }
   }
 

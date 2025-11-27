@@ -33,3 +33,12 @@
 
 * Added support for listening on state changes inside `FlowLogic`
 * All components have now a `dispose` method
+
+## 1.3.0
+
+* Added `FlowEventLogic<T>` for immutable, data-carrying events
+  - Events can now carry typed data instead of relying on mutable state
+  - New `flow.dispatch(event)` method for triggering immutable events
+  - Type-safe event handling with `react(T event)` method
+  - Optional event filtering with `reactsIf(T event)`
+  - Fully backward compatible with existing `FlowEvent` pattern

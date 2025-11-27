@@ -142,3 +142,54 @@ abstract class FlowReactiveLogic extends FlowLogic {
   @protected
   void react();
 }
+
+/// Base class for event-driven reactive logic.
+///
+/// Event logic responds to dispatched event instances of type [T].
+/// Unlike traditional [FlowReactiveLogic] which reacts to [FlowComponent]s,
+/// this logic reacts to immutable event objects dispatched via the event bus.
+///
+/// The [react] method receives the actual event instance, allowing
+/// access to event-specific data in a type-safe, immutable way.
+///
+/// Example:
+/// ```dart
+/// class SaveCustomerEvent {
+///   final Customer customer;
+///   const SaveCustomerEvent(this.customer);
+/// }
+///
+/// class SaveCustomerLogic extends FlowEventLogic<SaveCustomerEvent> {
+///   @override
+///   void react(SaveCustomerEvent event) {
+///     // Safe access to immutable event data
+///     final customer = event.customer;
+///     // ... save customer
+///   }
+/// }
+///
+/// // Dispatch from UI or other logic
+/// flow.dispatch(SaveCustomerEvent(newCustomer));
+/// ```
+abstract class FlowEventLogic<T> extends FlowLogic {
+  FlowEventLogic();
+
+  /// The type of event this logic responds to.
+  Type get eventType => T;
+
+  /// Whether the logic should react to this specific event instance.
+  ///
+  /// This allows filtering events based on their content.
+  /// Default implementation always returns true.
+  ///
+  /// If this is set to `false`, the logic will not be executed
+  /// even when an event of the correct type is dispatched.
+  bool reactsIf(T event) => true;
+
+  /// React to the dispatched event.
+  ///
+  /// This method receives the event instance, providing type-safe
+  /// access to the event's data.
+  @protected
+  void react(T event);
+}

@@ -89,6 +89,25 @@ final class FlowContext implements IFlowComponentListener {
     _listeners[component] = () => listener(component);
   }
 
+  /// Dispatches an event to all registered event logics.
+  ///
+  /// The event will be delivered to all [FlowEventLogic] instances
+  /// that are registered to handle events of this type.
+  ///
+  /// Example:
+  /// ```dart
+  /// class SaveCustomerEvent {
+  ///   final Customer customer;
+  ///   const SaveCustomerEvent(this.customer);
+  /// }
+  ///
+  /// // Dispatch from a widget
+  /// flow.dispatch(SaveCustomerEvent(newCustomer));
+  /// ```
+  void dispatch<T extends Object>(T event) {
+    manager.dispatch(event);
+  }
+
   /// Initializes the Flow context.
   @visibleForTesting
   void initialize() {

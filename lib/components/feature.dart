@@ -31,6 +31,10 @@ abstract class FlowFeature {
   @visibleForTesting
   final Map<Type, Set<FlowReactiveLogic>> reactiveLogics = {};
 
+  /// Map of event logic by event type.
+  @visibleForTesting
+  final Map<Type, Set<FlowEventLogic<dynamic>>> eventLogics = {};
+
   /// The manager that this feature is associated with.
   @protected
   @visibleForTesting
@@ -42,6 +46,7 @@ abstract class FlowFeature {
     return initializeLogics.length +
         disposalLogics.length +
         reactiveLogics.length +
+        eventLogics.length +
         cleanupLogics.length +
         executeLogics.length;
   }
@@ -49,6 +54,13 @@ abstract class FlowFeature {
   /// Sets the manager for this feature.
   void _setManager(FlowManager manager) {
     this.manager = manager;
+
+    // Register all event logics with the manager's event bus
+    for (final entry in eventLogics.entries) {
+      final eventType = entry.key;
+      final logics = entry.value;
+      manager._eventLogics.putIfAbsent(eventType, () => {}).addAll(logics);
+    }
   }
 
   /// Add an component to this feature.
@@ -90,6 +102,9 @@ abstract class FlowFeature {
         cleanupLogics.add(logic);
       case FlowFrameExecutionLogic():
         executeLogics.add(logic);
+      case FlowEventLogic():
+        final eventType = logic.eventType;
+        eventLogics.putIfAbsent(eventType, () => {}).add(logic);
       case FlowReactiveLogic():
         for (final component in logic.reactsTo) {
           reactiveLogics.putIfAbsent(component, () => {}).add(logic);
@@ -125,6 +140,7 @@ abstract class FlowFeature {
     final allLogics = <FlowLogic>{
       ...initializeLogics,
       ...reactiveLogics.values.expand((l) => l),
+      ...eventLogics.values.expand((l) => l),
       ...executeLogics,
       ...cleanupLogics,
       ...disposalLogics,

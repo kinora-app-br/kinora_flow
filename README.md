@@ -207,6 +207,7 @@ Define behavior and business logic:
 - **FlowFeatureInitializationLogic**: Setup tasks on feature initialization
 - **FlowFrameExecutionLogic**: Frame-based continuous execution
 - **FlowReactiveLogic**: React to component changes
+- **FlowEventLogic<T>**: React to typed, immutable event instances **(New in 1.3.0)**
 - **FlowCleanUpLogic**: Cleanup tasks after each frame
 - **FlowFeatureDisposalLogic**: Cleanup on feature disposal
 
@@ -466,6 +467,108 @@ class DatabaseDisposalLogic extends FlowFeatureDisposalLogic {
   }
 }
 ```
+
+#### FlowEventLogic (New in 1.3.0)
+
+React to immutable, typed event instances:
+
+**The Problem with Traditional FlowEvents:**
+
+Traditional `FlowEvent` components are singletons that cannot carry data. This forces developers to use mutable `FlowState` to pass data, creating race condition risks:
+
+```dart
+// ❌ Old pattern - risky!
+class SaveCustomerEvent extends FlowEvent {}  // No data!
+
+class CustomerEditorState extends FlowState<Customer> {
+  CustomerEditorState(super.value);
+}
+
+class SaveCustomerLogic extends FlowReactiveLogic {
+  @override
+  Set<Type> get reactsTo => {SaveCustomerEvent};
+  
+  @override
+  void react() {
+    // State could be mutated between validation and here!
+    final customer = manager.getComponent<CustomerEditorState>().value;
+    saveToDatabase(customer);
+  }
+}
+```
+
+**The Solution with FlowEventLogic:**
+
+`FlowEventLogic<T>` allows you to create immutable events that carry typed data:
+
+```dart
+// ✅ New pattern - safe and elegant!
+class SaveCustomerEvent {
+  final Customer customer;
+  const SaveCustomerEvent(this.customer);
+}
+
+class SaveCustomerLogic extends FlowEventLogic<SaveCustomerEvent> {
+  @override
+  void react(SaveCustomerEvent event) {
+    // Safe! Event data is immutable
+    final customer = event.customer;
+    saveToDatabase(customer);
+  }
+}
+
+// Dispatch from anywhere
+flow.dispatch(SaveCustomerEvent(newCustomer));
+```
+
+**Advanced Features:**
+
+Event filtering with `reactsIf`:
+
+```dart
+class UpdateCountEvent {
+  final int count;
+  const UpdateCountEvent(this.count);
+}
+
+class EvenNumberLogic extends FlowEventLogic<UpdateCountEvent> {
+  @override
+  bool reactsIf(UpdateCountEvent event) {
+    return event.count % 2 == 0;  // Only react to even numbers
+  }
+  
+  @override
+  void react(UpdateCountEvent event) {
+    print('Even number: ${event.count}');
+  }
+}
+```
+
+Multiple logics for the same event:
+
+```dart
+class ValidationLogic extends FlowEventLogic<SaveCustomerEvent> {
+  @override
+  void react(SaveCustomerEvent event) {
+    validateCustomer(event.customer);
+  }
+}
+
+class PersistenceLogic extends FlowEventLogic<SaveCustomerEvent> {
+  @override
+  void react(SaveCustomerEvent event) {
+    saveToDatabase(event.customer);
+  }
+}
+```
+
+**Benefits:**
+
+- ✅ **Type Safety**: Compile-time checking for event data
+- ✅ **Immutability**: No risk of data mutation
+- ✅ **Simplicity**: No need for separate state components
+- ✅ **Clarity**: Event data is explicit and self-documenting
+- ✅ **Backward Compatible**: Works alongside traditional `FlowEvent`
 
 ## 🔍 Debugging and Inspection
 
