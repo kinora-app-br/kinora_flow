@@ -42,3 +42,9 @@
   - Type-safe event handling with `react(T event)` method
   - Optional event filtering with `reactsIf(T event)`
   - Fully backward compatible with existing `FlowEvent` pattern
+
+### 1.3.1
+
+* Fixed incorrect `@protected` annotation on `FlowManager.dispatch` - dispatch should be public
+* Removed unnecessary use of dynamic types in event handling
+* Improved type safety throughout the event system
