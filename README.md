@@ -83,7 +83,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  kinora_flow: ^1.0.0
+  kinora_flow: ^{add version here}
 ```
 
 ### Basic Usage
