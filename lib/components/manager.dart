@@ -46,12 +46,16 @@ final class FlowManager implements IFlowComponentListener {
   void dispatch<T>(T event) {
     final logics = _eventLogics[event.runtimeType];
 
-    if (logics == null || logics.isEmpty) return;
-
-    for (final logic in logics) {
-      if (logic.reactsIf(event)) {
-        logic.react(event);
+    if (logics != null && logics.isNotEmpty) {
+      for (final logic in logics) {
+        if (logic.reactsIf(event)) {
+          logic.react(event);
+        }
       }
+    }
+
+    if (_parentManager != null) {
+      _parentManager.dispatch(event);
     }
   }
 

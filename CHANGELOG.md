@@ -48,3 +48,6 @@
 * Fixed incorrect `@protected` annotation on `FlowManager.dispatch` - dispatch should be public
 * Removed unnecessary use of dynamic types in event handling
 * Improved type safety throughout the event system
+
+## 1.3.1+1
+* Bug fix: Event dispatcher should consider parent scopes
