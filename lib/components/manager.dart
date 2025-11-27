@@ -43,19 +43,14 @@ final class FlowManager implements IFlowComponentListener {
   ///
   /// The event will be delivered to all [FlowEventLogic] instances
   /// that are registered to handle events of this type.
-  @visibleForTesting
-  void dispatch(Object event) {
+  void dispatch<T>(T event) {
     final logics = _eventLogics[event.runtimeType];
 
     if (logics == null || logics.isEmpty) return;
 
     for (final logic in logics) {
-      // Dynamic cast to call reactsIf and react with the event
-      final dynamic typedLogic = logic;
-      // ignore: avoid_dynamic_calls
-      if (typedLogic.reactsIf(event) as bool) {
-        // ignore: avoid_dynamic_calls
-        typedLogic.react(event);
+      if (logic.reactsIf(event)) {
+        logic.react(event);
       }
     }
   }
