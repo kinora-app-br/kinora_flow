@@ -6,7 +6,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 
-A powerful and flexible **Event Driven State Management** pattern implementation for Flutter applications. This package provides a reactive state management solution that promotes clean architecture, separation of concerns, and scalable application development, based on the work of  [Event-Component-System](https://github.com/FlameOfUdun/flutter_event_component_system) by [Ehsan Rashidi](https://github.com/FlameOfUdun).
+A powerful and flexible **Event Driven State Management** pattern implementation for Flutter applications. This package provides a reactive state management solution that promotes clean architecture, separation of concerns, and scalable application development.
 
 ## 🆚 Why Choose Kinora Flow Over Bloc?
 
@@ -1288,9 +1288,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Inspired by the Entity-Component-System pattern from game development built by [Ehsan Rashidi](https://github.com/FlameOfUdun)
+- Inspired by the Entity-Component-System pattern from game development built by Ehsan Rashidi
 - Built for the Flutter community with ❤️
-- Special thanks to all contributors and users and for Ehsan Rashidi
+- Special thanks to all contributors and users
 
 ## 📞 Support
 
